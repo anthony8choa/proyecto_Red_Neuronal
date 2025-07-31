@@ -64,10 +64,18 @@ class RedNeuronal:
             self.capas[i] -= learning_rate * deltas[i] @ activaciones[i].T
             self.biases[i] -= learning_rate * deltas[i]
 
+    def calcular_mse(self, pred, y):
+        return np.mean((pred - y) ** 2)
+
     def entrenar(self, datos, etiquetas, epocas=10):
         for e in range(epocas):
+            error_total = 0
             for x, y in zip(datos, etiquetas):
                 self.backpropagation(x, y)
+                pred = self.predecir(x)
+                error_total += self.calcular_mse(pred, y)
+            mse = error_total / len(datos)
+            print(f"Época {e+1}/{epocas} - Error cuadrático medio (MSE): {mse:.6f}")
 
     def predecir(self, x):
         salida, _ = self.forward(x)

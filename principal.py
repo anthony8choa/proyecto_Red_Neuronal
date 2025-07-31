@@ -23,9 +23,12 @@ def cargar_dataset(directorio):
             continue
         for archivo in os.listdir(carpeta):
             ruta = os.path.join(carpeta, archivo)
-            imagen = cargar_imagen(ruta)
-            datos.append(imagen)
-            etiquetas.append(np.array([[1]]) if clase == "Ia" else np.array([[0]]))
+            try:
+                imagen = cargar_imagen(ruta)
+                datos.append(imagen)
+                etiquetas.append(np.array([[1]]) if clase == "Ia" else np.array([[0]]))
+            except Exception as e:
+                print(f"⚠️ Error al cargar imagen {archivo}: {e}")
     return datos, etiquetas
 
 def menu():
@@ -34,11 +37,17 @@ def menu():
     neuronas = int(input("¿Cuántas neuronas por capa oculta? "))
     epocas = int(input("¿Cuántas épocas de entrenamiento? "))
 
-    print("\nCargando dataset y entrenando modelo...")
+    print("\nCargando dataset...")
     datos, etiquetas = cargar_dataset("dataset")
+
+    if not datos:
+        print("❌ Error: No se encontraron imágenes válidas en el dataset.")
+        return
+
+    print("Entrenando modelo...\n")
     red = RedNeuronal(capas_ocultas, neuronas, INPUT_SIZE, 1)
     red.entrenar(datos, etiquetas, epocas)
-    print("Entrenamiento completo.\n")
+    print("\n✅ Entrenamiento completo.\n")
 
     while True:
         print("----- MENÚ DE PRUEBA -----")
@@ -49,15 +58,18 @@ def menu():
             print("Ruta inválida. Intenta de nuevo.")
             continue
 
-        entrada = cargar_imagen(ruta)
-        resultado = red.predecir(entrada)
-        probabilidad = float(resultado[0][0])
+        try:
+            entrada = cargar_imagen(ruta)
+            resultado = red.predecir(entrada)
+            probabilidad = float(resultado[0][0])
 
-        print(f"\nProbabilidad: {probabilidad:.4f}")
-        if probabilidad > 0.5:
-            print("✅ Es tu rostro")
-        else:
-            print("❌ No es tu rostro")
+            print(f"\nProbabilidad: {probabilidad:.4f}")
+            if probabilidad > 0.5:
+                print("✅ Es tu rostro")
+            else:
+                print("❌ No es tu rostro")
+        except Exception as e:
+            print(f"⚠️ No se pudo procesar la imagen: {e}")
         print("\n")
 
 if __name__ == "__main__":
