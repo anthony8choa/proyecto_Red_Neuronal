@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class RedNeuronal:
     def __init__(self, capas_ocultas, neuronas_por_capa, entrada, salida):
@@ -76,6 +77,23 @@ class RedNeuronal:
                 error_total += self.calcular_mse(pred, y)
             mse = error_total / len(datos)
             print(f"Época {e+1}/{epocas} - Error cuadrático medio (MSE): {mse:.6f}")
+
+    def dividir_datos(self, datos, etiquetas, porcentaje_entrenamiento=0.8):
+        # Combina los datos y sus etiquetas correspondientes
+        combinados = list(zip(datos, etiquetas))
+        # Mezcla aleatoriamente los datos
+        random.shuffle(combinados)
+
+        # Calcula el punto de corte según el porcentaje
+        total = len(combinados)
+        corte = int(total * porcentaje_entrenamiento)
+
+        # Divide los datos en entrenamiento y prueba
+        datos_entrenamiento, etiquetas_entrenamiento = zip(*combinados[:corte])
+        datos_prueba, etiquetas_prueba = zip(*combinados[corte:])
+
+        # Convierte de nuevo a listas para facilitar su uso
+        return list(datos_entrenamiento), list(etiquetas_entrenamiento), list(datos_prueba), list(etiquetas_prueba)        
 
     def predecir(self, x):
         salida, _ = self.forward(x)
